@@ -1,20 +1,87 @@
 package main
 
-import "github.com/Tnze/CoolQ-Golang-SDK/v2/cqp"
+import (
+	"fmt"
+	"github.com/Tnze/CoolQ-Golang-SDK/v2/cqp"
+	"os"
+	"path/filepath"
+	"regexp"
+)
 
 //go:generate cqcfg -c .
-// cqp: 名称: GoDemo
-// cqp: 版本: 1.0.0:0
+// cqp: 名称: Vertical flip of Repeat picture
+// cqp: 版本: 1.0.0:1
 // cqp: 作者: Tnze
-// cqp: 简介: 一个超棒的Go语言插件Demo，它会回复你的私聊消息~
-func main() { /*此处应当留空*/ }
+// cqp: 简介: 复读图片之垂直翻转
+func main() { cqp.Main() }
 
 func init() {
-	cqp.AppID = "me.cqp.tnze.demo" // TODO: 修改为这个插件的ID
-	cqp.PrivateMsg = onPrivateMsg
+	cqp.AppID = "online.jdao.VerticalFlipOfRepeatPicture"
+	cqp.Enable = onEnable
+	cqp.GroupMsg = onGroupMsg
+
 }
 
-func onPrivateMsg(subType, msgID int32, fromQQ int64, msg string, font int32) int32 {
-	cqp.SendPrivateMsg(fromQQ, msg) //复读机
+var imgFold string
+
+// 当插件启用
+func onEnable() int32 {
+	imgFold = filepath.Join("data", "image", cqp.AppID)
+	err := os.Mkdir(imgFold, 0644)
+	if err != nil && !os.IsExist(err) {
+		Errorf("初始化", "无法创建用于发送图片的文件夹，%v", err)
+		return -1
+	}
 	return 0
 }
+
+// 当收到群消息
+func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
+	g := getGroup(fromGroup)
+	g.Lock()
+	defer g.Unlock()
+	if g.lastMsg != msg {
+		g.repeatCount = 1
+		g.lastMsg = msg
+	} else {
+		g.repeatCount++
+		if g.repeatCount == 2 && isImage(g.lastMsg) {
+			Infof("复读", "发现一次复读，%s", msg)
+			img, err := procImage(msg)
+			if err != nil {
+				Errorf("复读", "图片处理失败，%v", err)
+				return Ignore
+			}
+			cqp.SendGroupMsg(fromGroup, img)
+		}
+	}
+	return Ignore
+}
+
+var imageReg = regexp.MustCompile(`\[CQ:image,file=([^"]*)\]`)
+
+func isImage(msg string) bool {
+	// 必须要这条消息包含且仅包含一张图片
+	// 才认为这是一条图片消息
+	return msg == imageReg.FindString(msg)
+}
+
+// Errorf格式化输出错误日志
+func Errorf(tp, format string, args ...interface{}) {
+	cqp.AddLog(cqp.Error, tp, fmt.Sprintf(format, args...))
+}
+
+// Infof格式化输出信息日志
+func Infof(tp, format string, args ...interface{}) {
+	cqp.AddLog(cqp.Info, tp, fmt.Sprintf(format, args...))
+}
+
+// Debugf格式化输出调试日志
+func Debugf(tp, format string, args ...interface{}) {
+	cqp.AddLog(cqp.Debug, tp, fmt.Sprintf(format, args...))
+}
+
+const (
+	Ignore    int32 = 0 //忽略消息
+	Intercept       = 1 //拦截消息
+)
