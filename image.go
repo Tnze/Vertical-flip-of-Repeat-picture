@@ -32,7 +32,8 @@ func procImage(msg string) (string, error) {
 }
 
 func procImgPath(name, targetExt string) string {
-	baseWithoutExt := filepath.Base(name)[:len(name)-len(filepath.Ext(name))]
+	baseName := filepath.Base(name)
+	baseWithoutExt := baseName[:len(baseName)-len(filepath.Ext(baseName))]
 	return filepath.Join(imgFold, baseWithoutExt+"."+targetExt)
 }
 
