@@ -20,7 +20,7 @@ func procImage(msg string) (string, error) {
 	imgDir = cqp.GetImage(imgDir)
 
 	// 检查处理后图片是否已存在
-	procImgDir := procImgPath(imgDir, "png")
+	baseProcImg, procImgDir := procImgPath(imgDir, "png")
 	if _, err := os.Stat(procImgDir); err != nil && os.IsNotExist(err) {
 		err := convertImg(procImgDir, imgDir)
 		if err != nil {
@@ -28,13 +28,14 @@ func procImage(msg string) (string, error) {
 		}
 	}
 
-	return util.CQCode("image", "file", procImgDir), nil
+	return util.CQCode("image", "file", baseProcImg), nil
 }
 
-func procImgPath(name, targetExt string) string {
+func procImgPath(name, targetExt string) (string, string) {
 	baseName := filepath.Base(name)
 	baseWithoutExt := baseName[:len(baseName)-len(filepath.Ext(baseName))]
-	return filepath.Join(imgFold, baseWithoutExt+"."+targetExt)
+	base := baseWithoutExt + "." + targetExt
+	return filepath.Join(cqp.AppID, base), filepath.Join(imgFold, base)
 }
 
 func convertImg(dst, src string) error {
