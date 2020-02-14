@@ -9,10 +9,10 @@ import (
 )
 
 //go:generate cqcfg -c .
-// cqp: 名称: Vertical flip of Repeat picture
+// cqp: 名称: 复读图片之垂直翻转
 // cqp: 版本: 1.0.0:1
 // cqp: 作者: Tnze
-// cqp: 简介: 复读图片之垂直翻转
+// cqp: 简介: 当一张图在群内被重复两次以上时，将该图片上下翻转并发送，以有效打断复读
 func main() { cqp.Main() }
 
 func init() {

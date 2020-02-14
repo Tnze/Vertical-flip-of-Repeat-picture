@@ -70,7 +70,6 @@ func convertImg(dst, src string) error {
 func vFlip(m image.Image) image.Image {
 	mb := m.Bounds()
 	dst := image.NewRGBA(image.Rect(0, 0, mb.Dx(), mb.Dy()))
-	// 矩阵旋转
 	for x := mb.Min.X; x < mb.Max.X; x++ {
 		for y := mb.Min.Y; y < mb.Max.Y; y++ {
 			//  设置像素点
