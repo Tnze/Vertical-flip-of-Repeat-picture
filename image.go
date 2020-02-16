@@ -123,7 +123,7 @@ func vFlip(m image.Image) image.Image {
 	for x := mb.Min.X; x < mb.Max.X; x++ {
 		for y := mb.Min.Y; y < mb.Max.Y; y++ {
 			//  设置像素点
-			dst.Set(x, mb.Max.Y-y, m.At(x, y))
+			dst.Set(x, mb.Max.Y-y-1, m.At(x, y))
 		}
 	}
 	return dst
