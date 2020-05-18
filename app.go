@@ -63,7 +63,7 @@ var imageReg = regexp.MustCompile(`\[CQ:image,file=([^"]*)\]`)
 func isImage(msg string) bool {
 	// 必须要这条消息包含且仅包含一张图片
 	// 才认为这是一条图片消息
-	return msg == imageReg.FindString(msg)
+	return msg != "" && msg == imageReg.FindString(msg)
 }
 
 // Errorf格式化输出错误日志

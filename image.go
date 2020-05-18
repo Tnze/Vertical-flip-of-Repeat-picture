@@ -20,8 +20,10 @@ import (
 // procImage 处理一张图片消息并返回处理结果
 // panic if msg is not a image like [CQ:image,file=1.jpg]
 func procImage(msg string) (string, error) {
-	imgDir := imageReg.FindStringSubmatch(msg)[1]
-	imgDir = cqp.GetImage(imgDir)
+	var imgDir string
+	if sbm := imageReg.FindStringSubmatch(msg); len(sbm) > 1 {
+		imgDir = cqp.GetImage(sbm[1])
+	}
 
 	// 检查处理后图片是否已存在
 	baseProcImg, procImgDir := procImgPath(imgDir)
